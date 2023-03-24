@@ -2,6 +2,7 @@
 - name: Install Docker
   hosts: docker_server
   become: yes
+  # gather_facts: False
   tasks:
     - name: Install Docker & python3 & Docker compose
       vars:
@@ -21,7 +22,6 @@
       systemd:
         name: docker
         state: started
-    
 
 - name: add ec2-user to docker group
   hosts: docker_server
@@ -36,8 +36,15 @@
       meta: reset_connection
 
 
-- name: Test docker pull
+- name: Start docker containers
   hosts: docker_server
   tasks:
-    - name: Pull redis
-      command: docker pull redis 
+    - name: Copy docker compose
+      copy:
+        src: /home/youssefjh/Downloads/docker-compose-ans.yml 
+        dest: /home/ec2-user/docker-compose.yml
+
+    - name: Start containers from compose
+      docker_compose:
+        project_src: /home/ec2-user
+        state: present # docker-compose up 
